@@ -12,7 +12,6 @@
 
 <body>
     <div id="content"></div>
-    <div id="feedback"></div>
 
     <script>
         // model
@@ -22,15 +21,16 @@
         const disabled = ['', 'disabled']
         let addDisabled = 0;
         let chosenDisabled = 1;
+        let feedback = '';
 
         // view
         updateView();
         function updateView() {
+            chosenDisabled = chosenBar !== 'Ingen' ? 0 : 1
             let svgInnerHtml = '';
             for (let i = 0; i < numbers.length; i++) {
                 svgInnerHtml += createBar(numbers[i], i + 1);
             }
-            document.getElementById('feedback').innerHTML = /*HTML*/``
             document.getElementById('content').innerHTML = /*HTML*/`
                 <svg id="chart" width="500" viewBox="0 0 301 102">
                     ${svgInnerHtml}
@@ -39,9 +39,12 @@
                 <br />
                 Verdi:
                 <input type="number" min="1" max="10" oninput="inputValue = this.value" />
-                <button onclick="addBar()" ${disabled[addDisabled]}>Legg til stolpe</button>
-                <button onclick="changeBar()" ${disabled[chosenDisabled]}>Endre valgt stolpe</button><br />
+                <button onclick="addBar()" ${disabled[addDisabled]}>Legg til stolpe</button><br />
+                <button onclick="changeBar()" ${disabled[chosenDisabled]}>Endre valgt stolpe</button>
                 <button onclick="removeBar()" ${disabled[chosenDisabled]}>Fjerne valgt stolpe</button>
+                <div id="feedback">
+                    <p>${feedback}</p>    
+                </div>
             `;
         }
 
@@ -51,13 +54,15 @@
             let x = (barNo - 1) * (width + spacing) + 1;
             if (x > 190) {
                 addDisabled = 1;
-                document.getElementById('feedback').innerHTML = /*HTML*/`<p>Max stolper nådd</p>`
+                feedback = 'Max stolper nådd';
             }
+            let barClass = chosenBar == barNo ? "class='selected'" : "";
             let height = number * 10;
             let y = 100 - height + 1;
             let color = calcColor(1, 10, barNo);
+            
             return `<rect id="barNum${barNo}" onclick="handleClick(${barNo})" width="${width}" height="${height}"
-                    x="${x}" y="${y}" fill="${color}"></rect>`;
+                    x="${x}" y="${y}" fill="${color}" ${barClass}></rect>`;
         }
 
         function calcColor(min, max, val) {
@@ -71,47 +76,51 @@
         // controller (ingenting her ennå)
         function handleClick(barNum) {
             if (chosenBar === barNum) {
-                chosenBar = "Ingen";
-                chosenDisabled = 1;
+                resetSelected();
+                inputValue = '';
                 updateView();
             }
             else {
+                resetSelected();
                 console.log(barNum);
-                chosenDisabled = 0;
                 chosenBar = barNum;
                 updateView();
-                let barId = "barNum" + barNum;
-                document.getElementById(barId).classList.toggle("selected");
             }
         }
 
         function addBar() {
             if (inputValue === '') {
-                document.getElementById('feedback').innerHTML = /*HTML*/`<p>Ugyldig tall</p>`;
+                feedback = 'Ugyldig tall';
+                resetSelected();
+                updateView();
                 return;
             }
             numbers.push(parseInt(inputValue));
             console.log(numbers);
             resetSelected();
+            feedback = '';
             updateView();
         }
         function changeBar() {
             if (inputValue === '') {
-                document.getElementById('feedback').innerHTML = /*HTML*/`<p>Ugyldig tall</p>`;
+                feedback = 'Ugyldig tall';
+                resetSelected();
+                updateView();
                 return;
             }
             numbers[chosenBar-1] = inputValue;
             resetSelected();
+            feedback = '';
             updateView();
         }
         function removeBar() {
             numbers.splice(chosenBar-1, 1);
             resetSelected();
+            feedback = '';
             updateView();
         }
         function resetSelected() {
             chosenBar = "Ingen";
-            chosenDisabled = 1;
             inputValue = '';
         }
     </script>
