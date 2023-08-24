@@ -1,0 +1,90 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+        .selected {
+            stroke: black;
+            stroke-width: 1px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="content"></div>
+    <div id="maxReached"></div>
+
+    <script>
+        // model
+        let numbers = [7, 3, 1, 5, 8];
+        let chosenBar = "Ingen"; // Variabel for hvilken stolpe som er valgt
+        let inputValue; // Variabel for hva som er skrevet i input-feltet
+
+        // view
+        updateView();
+        function updateView() {
+            let svgInnerHtml = '';
+            for (let i = 0; i < numbers.length; i++) {
+                svgInnerHtml += createBar(numbers[i], i + 1);
+            }
+            document.getElementById('content').innerHTML = /*HTML*/`
+                <svg id="chart" width="500" viewBox="0 0 301 102">
+                    ${svgInnerHtml}
+                </svg><br/>
+                Valgt stolpe: <i>${chosenBar}</i>
+                <br />
+                Verdi:
+                <input type="number" min="1" max="10" oninput="inputValue = this.value" />
+                <button onclick="addBar()">Legg til stolpe</button>
+                <button disabled>Endre valgt stolpe</button><br />
+                <button disabled>Fjerne valgt stolpe</button>
+            `;
+        }
+
+        function createBar(number, barNo) {
+            const width = 8;
+            const spacing = 2;
+            let x = (barNo - 1) * (width + spacing) + 1;
+            if (x > 200) {
+                document.getElementById('maxReached').innerHTML = /*HTML*/`<p>Max stolper nådd</p>`
+                return;
+            }
+            let height = number * 10;
+            let y = 100 - height + 1;
+            let color = calcColor(1, 10, barNo);
+            return `<rect id="barNum${barNo}" onclick="handleClick(${barNo})" width="${width}" height="${height}"
+                    x="${x}" y="${y}" fill="${color}"></rect>`;
+        }
+
+        function calcColor(min, max, val) {
+            var minHue = 240, maxHue = 0;
+            var curPercent = (val - min) / (max - min);
+            var colString = "hsl(" + ((curPercent * (maxHue - minHue)) + minHue) + ",100%,50%)";
+            return colString;
+        }
+
+        
+        // controller (ingenting her ennå)
+        function handleClick(barNum) {
+            if (chosenBar === barNum) {
+                chosenBar = "Ingen";
+                updateView();
+            }
+            else {
+                console.log(barNum);
+                chosenBar = barNum;
+                updateView();
+                let barId = "barNum" + barNum;
+                document.getElementById(barId).classList.toggle("selected");
+            }
+        }
+
+        function addBar() {
+            numbers.push(parseInt(inputValue));
+            console.log(numbers);
+            updateView();
+        }
+    </script>
+</body>
+
+</html>
