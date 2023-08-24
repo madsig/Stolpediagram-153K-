@@ -12,13 +12,16 @@
 
 <body>
     <div id="content"></div>
-    <div id="maxReached"></div>
+    <div id="feedback"></div>
 
     <script>
         // model
         let numbers = [7, 3, 1, 5, 8];
         let chosenBar = "Ingen"; // Variabel for hvilken stolpe som er valgt
-        let inputValue; // Variabel for hva som er skrevet i input-feltet
+        let inputValue = ''; // Variabel for hva som er skrevet i input-feltet
+        const disabled = ['', 'disabled']
+        let addDisabled = 0;
+        let chosenDisabled = 1;
 
         // view
         updateView();
@@ -27,6 +30,7 @@
             for (let i = 0; i < numbers.length; i++) {
                 svgInnerHtml += createBar(numbers[i], i + 1);
             }
+            document.getElementById('feedback').innerHTML = /*HTML*/``
             document.getElementById('content').innerHTML = /*HTML*/`
                 <svg id="chart" width="500" viewBox="0 0 301 102">
                     ${svgInnerHtml}
@@ -35,9 +39,9 @@
                 <br />
                 Verdi:
                 <input type="number" min="1" max="10" oninput="inputValue = this.value" />
-                <button onclick="addBar()">Legg til stolpe</button>
-                <button disabled>Endre valgt stolpe</button><br />
-                <button disabled>Fjerne valgt stolpe</button>
+                <button onclick="addBar()" ${disabled[addDisabled]}>Legg til stolpe</button>
+                <button onclick="changeBar()" ${disabled[chosenDisabled]}>Endre valgt stolpe</button><br />
+                <button onclick="removeBar()" ${disabled[chosenDisabled]}>Fjerne valgt stolpe</button>
             `;
         }
 
@@ -45,9 +49,9 @@
             const width = 8;
             const spacing = 2;
             let x = (barNo - 1) * (width + spacing) + 1;
-            if (x > 200) {
-                document.getElementById('maxReached').innerHTML = /*HTML*/`<p>Max stolper nådd</p>`
-                return;
+            if (x > 190) {
+                addDisabled = 1;
+                document.getElementById('feedback').innerHTML = /*HTML*/`<p>Max stolper nådd</p>`
             }
             let height = number * 10;
             let y = 100 - height + 1;
@@ -68,10 +72,12 @@
         function handleClick(barNum) {
             if (chosenBar === barNum) {
                 chosenBar = "Ingen";
+                chosenDisabled = 1;
                 updateView();
             }
             else {
                 console.log(barNum);
+                chosenDisabled = 0;
                 chosenBar = barNum;
                 updateView();
                 let barId = "barNum" + barNum;
@@ -80,9 +86,33 @@
         }
 
         function addBar() {
+            if (inputValue === '') {
+                document.getElementById('feedback').innerHTML = /*HTML*/`<p>Ugyldig tall</p>`;
+                return;
+            }
             numbers.push(parseInt(inputValue));
             console.log(numbers);
+            resetSelected();
             updateView();
+        }
+        function changeBar() {
+            if (inputValue === '') {
+                document.getElementById('feedback').innerHTML = /*HTML*/`<p>Ugyldig tall</p>`;
+                return;
+            }
+            numbers[chosenBar-1] = inputValue;
+            resetSelected();
+            updateView();
+        }
+        function removeBar() {
+            numbers.splice(chosenBar-1, 1);
+            resetSelected();
+            updateView();
+        }
+        function resetSelected() {
+            chosenBar = "Ingen";
+            chosenDisabled = 1;
+            inputValue = '';
         }
     </script>
 </body>
