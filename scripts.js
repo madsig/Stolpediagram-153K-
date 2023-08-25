@@ -62,9 +62,9 @@ contentElement.addEventListener("click", function (event) {
     const barNum = event.target.getAttribute("data-bar");
 
     if (barNum) handleClick(barNum);
-    if (event.target.id == 'addButton') addBar();
-    if (event.target.id == 'changeButton') changeBar();
-    if (event.target.id == 'removeButton') removeBar();
+    else if (event.target.id == 'addButton') addBar();
+    else if (event.target.id == 'changeButton') changeBar();
+    else if (event.target.id == 'removeButton') removeBar();
 });
 
 
